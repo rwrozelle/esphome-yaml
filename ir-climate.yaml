@@ -1,0 +1,55 @@
+substitutions:
+  name: ir-climate
+  friendly_name: Sunroom Heat Pump
+
+packages:
+  va: !include common/open-thread-h2.yaml
+
+external_components:
+  - source: github://pr#9281
+    components: [openthread, factory_reset]
+    refresh: 1h
+  - source: github://pr#9178
+    components: [friedrich]
+    refresh: 1h
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv
+
+#remote_receiver:
+#  id: rc
+#  pin:
+#    number: GPIO13
+#    inverted: True
+#    mode: INPUT_PULLUP
+#  dump: aeha
+#  idle: 25ms
+
+remote_transmitter:
+  id: rt
+  pin: GPIO14
+  carrier_duty_percent: 50%
+
+climate:
+  - platform: friedrich
+    name: "SunRoom HeatPump"
+#    receiver_id: rc
+
+switch:
+  - platform: factory_reset
+    name: "Factory Reset"

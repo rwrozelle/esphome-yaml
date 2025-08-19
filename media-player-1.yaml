@@ -1,0 +1,45 @@
+substitutions:
+  name: media-player-1
+  friendly_name: Media Player 1
+
+packages:
+  va: !include common/media-player.yaml
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
+media_player:
+  - platform: speaker
+    id: !extend external_media_player
+    off_on_enabled: True
+
+    on_turn_on:
+      then:
+        - logger.log: "Turn On Media Player"
+        - homeassistant.service:
+            service: switch.turn_on
+            data:
+              entity_id: switch.media_player_1_switch
+    
+    on_turn_off:
+      then:
+        - logger.log: "Turn Off Media Player"
+        - homeassistant.service:
+            service: switch.turn_off
+            data:
+              entity_id: switch.media_player_1_switch

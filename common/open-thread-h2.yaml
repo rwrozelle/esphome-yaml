@@ -1,0 +1,30 @@
+esphome:
+  name: open-thread
+  friendly_name: Open Thread
+  name_add_mac_suffix: true
+
+esp32:
+  board: esp32-h2-devkitm-1
+  variant: esp32h2
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_OPENTHREAD_XTAL_ACCURACY: "10"
+
+network:
+  enable_ipv6: true
+
+logger:
+  level: DEBUG
+  hardware_uart: USB_SERIAL_JTAG
+  logs:
+    sensor: WARN  # avoids logging debug sensor updates
+
+api:
+  id: api_id
+
+openthread:
+  id: op_id
+
+ 

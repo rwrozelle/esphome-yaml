@@ -1,0 +1,90 @@
+external_components:
+  - source: github://pr#9295
+    components: [speaker]
+    refresh: 1h
+
+substitutions:
+  hidden_ssid: "false"
+
+esphome:
+  name: media-player
+  friendly_name: Media Player
+  name_add_mac_suffix: true
+  min_version: 2025.3.3
+
+esp32:
+  board: esp32-s3-devkitc-1
+  variant: esp32s3
+  flash_size: 16MB
+  framework:
+    type: esp-idf
+    version: recommended
+    sdkconfig_options:
+      CONFIG_ESP32S3_DEFAULT_CPU_FREQ_240: "y"
+      CONFIG_ESP32S3_DATA_CACHE_64KB: "y"
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: "y"
+      CONFIG_ESP32S3_INSTRUCTION_CACHE_32KB: "y"
+
+      CONFIG_BT_ALLOCATION_FROM_SPIRAM_FIRST: "y"
+      CONFIG_BT_BLE_DYNAMIC_ENV_MEMORY: "y"
+
+      CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC: "y"
+      CONFIG_MBEDTLS_SSL_PROTO_TLS1_3: "y"  # TLS1.3 support isn't enabled by default in IDF 5.1.5
+
+wifi:
+  id: wifi_id
+  fast_connect: ${hidden_ssid}
+
+logger:
+  level: DEBUG
+  logs:
+    sensor: WARN  # avoids logging debug sensor updates
+
+api:
+  id: api_id
+
+psram:
+ mode: octal
+ speed: 80MHz
+
+i2s_audio:
+    i2s_lrclk_pin: GPIO4
+    i2s_bclk_pin: GPIO6
+
+speaker:
+  - platform: i2s_audio
+    id: speaker_id
+    dac_type: external
+    i2s_dout_pin: GPIO5
+    sample_rate: 44100
+    channel: stereo
+    timeout: never
+    
+  - platform: mixer
+    id: mixer_speaker_id
+    output_speaker: speaker_id
+    source_speakers:
+      - id: announcement_spk_mixer_input
+        timeout: never
+      - id: media_spk_mixer_input
+        timeout: never
+    
+media_player:
+  - platform: speaker
+    name: "Media Player"
+    id: external_media_player
+    volume_increment: 0.05
+    volume_min: 0.0
+    volume_max: 1.0
+    media_pipeline:
+        speaker: media_spk_mixer_input
+        num_channels: 2
+        #format: NONE
+    announcement_pipeline:
+        speaker: announcement_spk_mixer_input
+        num_channels: 2
+    on_announcement:
+      - mixer_speaker.apply_ducking:
+          id: media_spk_mixer_input
+          decibel_reduction: 20
+          duration: 0.0s

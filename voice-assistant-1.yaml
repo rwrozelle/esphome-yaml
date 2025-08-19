@@ -1,0 +1,29 @@
+substitutions:
+  name: voice-assistant-1
+  friendly_name: Voice Assistant 1
+
+packages:
+  va: !include common/voice-assistant.yaml
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
+switch:
+  - id: !extend timer_ringing
+    name: Timer Ringing
+    internal: false
