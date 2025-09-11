@@ -6,9 +6,6 @@ packages:
   va: !include common/open-thread-h2.yaml
 
 external_components:
-  - source: github://pr#9281
-    components: [openthread, factory_reset]
-    refresh: 1h
   - source: github://pr#9178
     components: [friedrich]
     refresh: 1h
