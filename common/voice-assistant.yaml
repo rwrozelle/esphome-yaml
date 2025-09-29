@@ -16,12 +16,14 @@ substitutions:
   voice_assist_error_phase_id: '11'
   # Change this to true in case you have a hidden SSID at home.
   hidden_ssid: "false"
+  timer_finished_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
+  wake_word_triggered_sound_file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/wake_word_triggered.flac
 
 esphome:
   name: home-assistant-voice
   friendly_name: Home Assistant Voice
   name_add_mac_suffix: true
-  min_version: 2025.7.2
+  min_version: 2025.9.0
   on_boot:
     priority: 375
     then:
@@ -491,14 +493,14 @@ i2s_audio:
 
 microphone:
   - platform: i2s_audio
+    id: i2s_mics
     i2s_din_pin: GPIO7 #SD pin on the INMP441
     adc_type: external
     pdm: false
     sample_rate: 16000
     bits_per_sample: 32bit
-    i2s_mode: primary
+    i2s_mode: secondary
     i2s_audio_id: i2s_input
-    id: va_microphone
     channel: left
 
 speaker:
@@ -584,15 +586,16 @@ media_player:
           - micro_wake_word.start:
     files:
       - id: timer_finished_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/timer_finished.flac
+        file: ${timer_finished_sound_file}
       - id: wake_word_triggered_sound
-        file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/wake_word_triggered.flac
+        file: ${wake_word_triggered_sound_file}
       - id: error_cloud_expired
         file: https://github.com/esphome/home-assistant-voice-pe/raw/dev/sounds/error_cloud_expired.mp3
 
 micro_wake_word:
   id: mww
-  microphone: va_microphone
+  microphone:
+    microphone: i2s_mics
   models:
     - model: https://github.com/kahrendt/microWakeWord/releases/download/okay_nabu_20241226.3/okay_nabu.json
       id: okay_nabu
@@ -649,7 +652,8 @@ micro_wake_word:
 
 voice_assistant:
   id: va
-  microphone: va_microphone
+  microphone:
+    microphone: i2s_mics
   media_player: external_media_player
   micro_wake_word: mww
   use_wake_word: false
