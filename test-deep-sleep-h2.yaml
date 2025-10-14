@@ -1,0 +1,60 @@
+substitutions:
+  name: test-deep-sleep-h2
+  friendly_name: Test Deep Sleep H2
+
+packages:
+  va: !include common/open-thread-h2.yaml
+
+esphome:
+  name: ${name}
+  name_add_mac_suffix: false
+  friendly_name: ${friendly_name}
+
+esp32:
+  framework:
+    type: esp-idf
+    version: latest
+#    log_level: DEBUG
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    id: ota_esphome
+    password: !secret ota_password
+
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv
+
+deep_sleep:
+  id: deep_sleep_1
+  run_duration: 1min
+  sleep_duration: 1min
+  
+mqtt:
+  broker: 192.168.1.25
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+  discover_ip: false
+  discovery: false
+
+  on_message:
+    - topic: esphome_sleep/ota_mode
+      payload: 'ON'
+      then:
+        - deep_sleep.prevent: deep_sleep_1
+    - topic: esphome_sleep/ota_mode
+      payload: 'OFF'
+      then:
+        - deep_sleep.allow: deep_sleep_1
+
+switch:
+  - platform: factory_reset
+    name: "Factory Reset"
+    discovery: false
+  - platform: restart
+    name: "Restart"
+    discovery: false
