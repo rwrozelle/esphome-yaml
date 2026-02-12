@@ -89,7 +89,7 @@ api:
 psram:
   mode: octal
   speed: 80MHz
- ignore_not_found: false
+  ignore_not_found: false
 
 globals:
   # Global initialization variable. Initialized to true and set to false once everything is connected. Only used to have a smooth "plugging" experience
