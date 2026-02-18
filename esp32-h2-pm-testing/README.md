@@ -112,3 +112,22 @@ needed to determine why mqtt component is causing these wakeups.
 
 ![Alt text](./esp32-h2-pm-ot-mqtt.png)
 
+## API Test, Without Power Management, SED
+Use api component, remove power_management component, still setup as SED
+
+Test results in an average amperage of ~16mA.
+
+![Alt text](./esp32-h2-ot-api.png)
+
+## API Test, Without Power Management, MTD
+Use api component, remove power_management component, setup as MTD (Radio always on).
+
+```yaml
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv
+```
+
+Test results in an average amperage of ~27mA.
+
+![Alt text](./esp32-h2-ot-api-MTD.png)
