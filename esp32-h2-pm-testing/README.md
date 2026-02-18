@@ -54,7 +54,7 @@ Test results in an average amperage of ~.5mA.  A pulse to 20mA occurs once per m
 
 ## Add Open Thread Test
 Add openthread component configure for Sleepy End Device at a poll_period of 10seconds.
-Switch added for later use and is "OFF" for all testing
+Switch added for later use with api and mqtt to make it easier to access chip and is "OFF" for all testing
 
 ```yaml
 openthread:
