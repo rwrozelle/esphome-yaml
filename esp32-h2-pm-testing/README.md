@@ -7,7 +7,7 @@ Testing the external power_management component under multiple yaml configuratio
 * DUT Features: BT 5 (LE), IEEE802.15.4, Single Core, 96MHz, Crystal frequency:  32MHz
 
 ## Initial Test
-The initial test was to establish a baseline power profile over a 1 minute band.
+The initial test to establish a baseline power profile over a 1 minute band.
 
 ```yaml
 external_components:
@@ -48,5 +48,66 @@ power_management:
 network:
   enable_ipv6: true
 ```
+Test results in an average amperage of ~.5mA.  A pulse to 20mA occurs once per minute and is caused by the preferences component waking the chip up to store preferences in NVS.
 
 ![Alt text](./esp32-h2-pm.png)
+
+## Add Open Thread Test
+Add openthread component configure for Sleepy End Device at a poll_period of 10seconds.
+Switch added for later use and is "OFF" for all testing
+
+```yaml
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv
+  poll_period: 10sec
+
+switch:
+  - platform: template
+    name: "Radio Always On"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      then:
+        - logger.log: "Radio Always On"
+        - openthread.radio: true
+    turn_off_action:
+      then:
+        - logger.log: "Radio Off When Idle"
+        - openthread.radio: false
+```
+
+Test results in an average amperage of ~.75mA.  A pulse to 20mA occurs once per second and is sourced in openthread task generating a 1 second timer, further research
+needed to determine if there is a configuration of openthread that would stop this wakeup.
+
+![Alt text](./esp32-h2-pm-ot.png)
+
+## Add API Test
+Add api component
+
+```yaml
+api:
+  encryption:
+    key: !secret api_encryption_key
+```
+
+Test results in an average amperage of ~1.6mA.  Pulses to 20mA occur frequently around 5-7 times per second with short bursts to higher occurance happening at least once per minute, further research
+needed to determine why api component is causing these wakeups.
+
+![Alt text](./esp32-h2-pm-ot-api.png)
+
+## Remove API, Add MQTT Test
+Remove api component and add mqtt component
+
+```yaml
+mqtt:
+  broker: 192.168.1.25
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+```
+
+Test results in an average amperage of ~2.7mA.  Pulses to 20mA occur frequently with short bursts to higher occurance happening, further research
+needed to determine why mqtt component is causing these wakeups.
+
+![Alt text](./esp32-h2-pm-ot-mqtt.png)
+
