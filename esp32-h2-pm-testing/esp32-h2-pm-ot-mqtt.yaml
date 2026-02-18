@@ -1,0 +1,61 @@
+external_components:
+  # [power_management] new component that enables power management for esp_idf
+  - source: github://pr#12325
+    components: [power_management]
+    refresh: 1h
+  # [openthread] Provide action to control radio on/off when poll_period > 0
+  - source: github://pr#11766
+    components: [openthread]
+    refresh: 1h
+
+esphome:
+  name: test-esp32h2-2
+  friendly_name: Test ESP32H2 2
+
+esp32:
+  board: esp32-h2-devkitm-1
+  variant: ESP32H2
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+    log_level: NONE
+    sdkconfig_options:
+      CONFIG_RTC_CLK_SRC_INT_RC: "n"
+      CONFIG_RTC_CLK_SRC_EXT_CRYS: "y"
+      CONFIG_OPENTHREAD_LOG_LEVEL_DYNAMIC: "n"
+      CONFIG_OPENTHREAD_LOG_LEVEL_NONE: "y"
+
+logger:
+  level: NONE
+
+power_management:
+  enable_light_sleep: true
+  power_down_flash: true
+  power_down_peripherals: true
+
+network:
+  enable_ipv6: true
+
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv
+  poll_period: 10sec
+
+mqtt:
+  broker: 192.168.1.25
+  username: !secret mqtt_user
+  password: !secret mqtt_password
+
+switch:
+  - platform: template
+    name: "Radio Always On"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      then:
+        - logger.log: "Radio Always On"
+        - openthread.radio: true
+    turn_off_action:
+      then:
+        - logger.log: "Radio Off When Idle"
+        - openthread.radio: false
