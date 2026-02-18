@@ -4,7 +4,8 @@ Testing the external power_management component under multiple yaml configuratio
 * Test Date 2026-02-18
 * EspHome Version: 2026.3.0-dev20260218
 * DUT: esp32-h2 Super Mini - ESP32-H2 (revision v0.1)
-* DUT Features: BT 5 (LE), IEEE802.15.4, Single Core, 96MHz, Crystal frequency:  32MHz
+* DUT Features: BT 5 (LE), IEEE802.15.4, Single Core, 96MHz, Crystal frequency: 32MHz
+* Power Supply: 3.3V pin
 
 ## Initial Test
 The initial test to establish a baseline power profile over a 1 minute band.
