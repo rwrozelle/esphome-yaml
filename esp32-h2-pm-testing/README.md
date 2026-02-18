@@ -49,4 +49,4 @@ network:
   enable_ipv6: true
 ```
 
-![Alt text](./esp32-h2-pm.jpg)
+![Alt text](./esp32-h2-pm.png)
