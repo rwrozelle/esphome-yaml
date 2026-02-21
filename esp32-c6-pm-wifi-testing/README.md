@@ -1,4 +1,4 @@
-# Power Management Testing of esp32-h2 Super Mini
+# Power Management Testing of esp32-c6 DFRobot Fire Beetle
 Testing the external power_management component under multiple yaml configurations using the Nordic Semiconductor Power Profiler Kit II (PPK2)
 
 * Test Date 2026-02-21

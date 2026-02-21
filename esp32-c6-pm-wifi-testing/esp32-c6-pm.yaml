@@ -13,12 +13,11 @@ esp32:
   variant: esp32c6
   flash_size: 4MB
   framework:
-    type: esp-idf
+    type: esp-
     log_level: NONE
     sdkconfig_options:
-      #esp32-c6 Fire Beetle v1.2 has a 40Mhz external clock
-      CONFIG_RTC_CLK_SRC_INT_RC: "n"
-      CONFIG_RTC_CLK_SRC_EXT_CRYS: "y"
+      CONFIG_OPENTHREAD_LOG_LEVEL_DYNAMIC: "n"
+      CONFIG_OPENTHREAD_LOG_LEVEL_NONE: "y"
 
 logger:
   level: DEBUG
