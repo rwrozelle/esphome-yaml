@@ -1,8 +1,8 @@
 # Power Management Testing of esp32-c6 DFRobot Fire Beetle
 Testing the external power_management component under multiple yaml configurations using the Nordic Semiconductor Power Profiler Kit II (PPK2)
 
-* Test Date 2026-02-21
-* EspHome Version: 2026.3.0-dev20260221
+* Test Date 2026-02-23
+* EspHome Version: 2026.3.0-dev20260223
 * DUT: ESP32-C6FH4 (QFN32) (revision v0.2) (esp32-c6 DFRobot Fire Beetle v1.2
 * DUT Features: Wi-Fi 6, BT 5 (LE), IEEE802.15.4, Single Core + LP Core, 160MHz, Crystal frequency: 40MHz
 * Power Supply: 3.3V pin
@@ -15,6 +15,10 @@ external_components:
   # [power_management] new component that enables power management for esp_idf
   - source: github://pr#12325
     components: [power_management]
+    refresh: 1h
+  # [openthread] Provide action to control radio on/off when poll_period > 0
+  - source: github://pr#11766
+    components: [openthread]
     refresh: 1h
 
 esphome:
