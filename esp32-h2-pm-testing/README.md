@@ -92,10 +92,24 @@ api:
     key: !secret api_encryption_key
 ```
 
-Test results in an average amperage of ~1.6mA.  Pulses to 20mA occur frequently around 5-7 times per second with short bursts to higher occurance happening at least once per minute, further research
-needed to determine why api component is causing these wakeups.
+Test results in an average amperage of ~1.6mA.  Pulses to 20mA occur frequently around 5-7 times per second with short bursts to higher occurance happening at least once per minute.
 
 ![Alt text](./esp32-h2-pm-ot-api.png)
+
+Further research, indicates that the following configurations for LWIP TCP have an impact:
+
+* CONFIG_LWIP_TCP_TMR_INTERVAL
+* CONFIG_LWIP_TCP_RTO_TIME
+
+For example, setting:
+
+```yaml
+    sdkconfig_options:
+      CONFIG_LWIP_TCP_TMR_INTERVAL: "5000"
+      CONFIG_LWIP_TCP_RTO_TIME: "10000"
+```
+
+Decreased the average amperage to ~.9mA. with the pulsing to 20mA occuring around 1 per second.
 
 ## Remove API, Add MQTT Test
 Remove api component and add mqtt component
