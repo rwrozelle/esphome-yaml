@@ -109,7 +109,7 @@ For example, setting:
       CONFIG_LWIP_TCP_RTO_TIME: "10000"
 ```
 
-Decreased the average amperage to ~.9mA. with the pulsing to 20mA occuring around 1 per second.
+Decreased the average amperage to ~1mA. with the pulsing to 20mA occuring around 1 per second.
 
 ## Remove API, Add MQTT Test
 Remove api component and add mqtt component
