@@ -92,6 +92,21 @@ api:
 ```
 
 Test results in an average amperage of ~.75mA. Pulses to 35mA occur frequently around 5-7 times per second with short bursts to
-higher occurance happening at least once per minute, further research needed to determine why api component is causing these wakeups.
+higher occurance happening at least once per minute.
 
 ![Alt text](./esp32-c6-pm-ot-api.png)
+
+Further research, indicates that the following configurations for LWIP TCP have an impact:
+
+* CONFIG_LWIP_TCP_TMR_INTERVAL
+* CONFIG_LWIP_TCP_RTO_TIME
+
+For example, setting:
+
+```yaml
+    sdkconfig_options:
+      CONFIG_LWIP_TCP_TMR_INTERVAL: "5000"
+      CONFIG_LWIP_TCP_RTO_TIME: "10000"
+```
+
+Decreased the average amperage to ~.66mA. with the pulsing to 35mA occuring around 1 per second.
