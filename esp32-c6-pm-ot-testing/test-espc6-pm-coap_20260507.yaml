@@ -1,0 +1,119 @@
+#runtime_stats:
+#  log_interval: 60s
+
+external_components:
+  # [network][socket] Disable IPV4
+  - source: github://pr#14526
+    components: [network,socket]
+    refresh: 1h
+  # [openthread] Provide action to control poll_period when device MTD
+  - source: github://pr#11766
+    components: [openthread]
+    refresh: 1h
+  # [power_management] new component that enables power management for esp_idf
+  - source: github://pr#12325
+    components: [power_management]
+    refresh: 1h
+  # [preferences] make IntervalSyncer a PollingComponent
+  - source: github://pr#14370
+    components: [preferences]
+    refresh: 1h
+  # [DNM] ESP-IDF 6.0 support testing
+  - source: github://pr#14770
+    components: [esp32]
+    refresh: 1h
+  # Bespoke Coap Server
+  - source: github://rwrozelle/esphome@ot-coap-server
+    components: [esp32]
+    refresh: 1h
+
+substitutions:
+  poll_period: 60sec
+
+esphome:
+  name: test-esp32c6-3
+  friendly_name: Test ESP32C6 3
+  on_boot:
+    then:
+      - delay: 70s
+      - lambda: |-
+          App.set_loop_interval(30000);
+      - logger.log: "Loop interval set to 30sec"
+      - component.suspend: preferences_id
+      - logger.log: "stop preference storing"
+
+preferences:
+ id: preferences_id
+
+esp32:
+  #esp32-c6 Fire Beetle v1.2
+  variant: esp32c6
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+    version: 6.0.1
+    log_level: INFO
+    sdkconfig_options:
+      CONFIG_VFS_SUPPORT_DIR: "y"
+      CONFIG_MBEDTLS_FS_IO: "y"
+      CONFIG_LIBC_PICOLIBC_NEWLIB_COMPATIBILITY: "y"
+  watchdog_timeout: 60s
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0 # monitor via UART pins
+
+power_management:
+  enable_light_sleep: true
+  idle_time_before_sleep: 10
+  power_down_flash: true
+  power_down_peripherals: true
+#  profiling: true
+
+network:
+  enable_ipv6: true
+  enable_ipv4: false
+
+openthread:
+  device_type: mtd
+  tlv: !secret openthread_tlv_wed
+  force_dataset: true
+  poll_period: ${poll_period}
+  output_power: 0
+
+coap_server:
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+switch:
+  - platform: template
+    name: "Radio Always On"
+    optimistic: true
+    restore_mode: ALWAYS_OFF
+    turn_on_action:
+      then:
+        - logger.log: "Radio Always On"
+        - openthread.pollperiod: 0s
+        - lambda: |-
+            App.set_loop_interval(7);
+    turn_off_action:
+      then:
+        - logger.log: "Radio Off When Idle"
+        - openthread.pollperiod: ${poll_period}
+        - lambda: |-
+            App.set_loop_interval(30000);
+
+# used to determine if hardware reboots are occuring
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_sensor_id
+    type: seconds
+    update_interval: ${poll_period}
+    # profiling sleep to stdout - don't do permanently
+#    on_value:
+#      then:
+#      - lambda: |-
+#          esp_pm_dump_locks(stdout);
