@@ -24,7 +24,7 @@ external_components:
     refresh: 1h
   # Bespoke Coap Server
   - source: github://rwrozelle/esphome@ot-coap-server
-    components: [esp32]
+    components: [coap_server]
     refresh: 1h
 
 substitutions:
