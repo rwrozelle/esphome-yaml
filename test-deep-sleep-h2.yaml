@@ -1,60 +1,99 @@
-substitutions:
-  name: test-deep-sleep-h2
-  friendly_name: Test Deep Sleep H2
-
-packages:
-  va: !include common/open-thread-h2.yaml
-
 esphome:
-  name: ${name}
-  name_add_mac_suffix: false
-  friendly_name: ${friendly_name}
+  name: test-esp32c6-4
+  friendly_name: Test ESP32C6 4
+  on_boot:
+    priority: -100
+    then:
+      - script.execute: wait_for_esphome_prevent_sleep_value
 
 esp32:
+  #esp32-c6 Fire Beetle v1.2
+  variant: esp32c6
+  flash_size: 4MB
   framework:
     type: esp-idf
-    version: latest
-#    log_level: DEBUG
+    log_level: INFO
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0 # monitor via UART pins
+
+network:
+  enable_ipv6: true
+
+openthread:
+  device_type: mtd
+#  force_dataset: true
+  tlv: !secret openthread_tlv_wed
+  output_power: 0
+  on_connect:
+      then:
+      - logger.log: "openthread connected"
+  on_disconnect:
+      then:
+      - logger.log: "openthread disconnected"
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
 
 api:
   encryption:
     key: !secret api_encryption_key
 
-ota:
-  - platform: esphome
-    id: ota_esphome
-    password: !secret ota_password
-
-openthread:
-  device_type: mtd
-  tlv: !secret openthread_tlv
-
 deep_sleep:
   id: deep_sleep_1
   run_duration: 1min
   sleep_duration: 1min
-  
-mqtt:
-  broker: 192.168.1.25
-  username: !secret mqtt_user
-  password: !secret mqtt_password
-  discover_ip: false
-  discovery: false
 
-  on_message:
-    - topic: esphome_sleep/ota_mode
-      payload: 'ON'
-      then:
-        - deep_sleep.prevent: deep_sleep_1
-    - topic: esphome_sleep/ota_mode
-      payload: 'OFF'
-      then:
-        - deep_sleep.allow: deep_sleep_1
+# used to determine if hardware reboots are occuring
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_sensor_id
+    type: seconds
+    update_interval: 60sec
 
-switch:
-  - platform: factory_reset
-    name: "Factory Reset"
-    discovery: false
-  - platform: restart
-    name: "Restart"
-    discovery: false
+binary_sensor:
+  - platform: homeassistant
+    name: "Input Boolean Prevent Sleep Sensor"
+    entity_id: input_boolean.esphome_prevent_sleep
+    id: ESPHome_prevent_sleep_sensor
+    trigger_on_initial_state: true
+    internal: true
+    # transition of input_boolean.esphome_prevent_sleep during awake
+    on_state:
+      then:
+      - if:
+          condition:
+            binary_sensor.is_on: ESPHome_prevent_sleep_sensor
+          then:
+            - logger.log: "input_boolean.esphome_prevent_sleep ON, prevent deep sleep"
+            - deep_sleep.prevent: deep_sleep_1
+          else:
+            - logger.log: "input_boolean.esphome_prevent_sleep OFF, enter deep sleep"
+            - deep_sleep.enter: deep_sleep_1
+
+# wakeup check of input_boolean.esphome_prevent_sleep
+script:
+  - id: wait_for_esphome_prevent_sleep_value
+    mode: queued
+    then:
+      - wait_until:
+          condition:
+            api.connected: {}
+      - component.update: uptime_sensor_id
+      - wait_until:
+          condition:
+            lambda: return id(ESPHome_prevent_sleep_sensor).has_state();
+      - if:
+          condition:
+            binary_sensor.is_on: ESPHome_prevent_sleep_sensor
+          then:
+            - logger.log: "input_boolean.esphome_prevent_sleep ON, prevent deep sleep"
+            - deep_sleep.prevent: deep_sleep_1
+          else:
+            - logger.log: "input_boolean.esphome_prevent_sleep OFF, enter deep sleep"
+            - deep_sleep.enter: deep_sleep_1
+
+    
