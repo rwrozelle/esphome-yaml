@@ -1,0 +1,139 @@
+external_components:
+  # [network][socket] Disable IPV4
+  - source: github://pr#14526
+    components: [network,socket]
+    refresh: 1h
+  # [openthread] Add on connect and on disconnect triggers
+  - source: github://pr#16335
+    components: [openthread]
+    refresh: 1h
+  # [power_management] new component that enables power management for esp_idf
+  - source: github://pr#12325
+    components: [power_management]
+    refresh: 1h
+  # [preferences] make IntervalSyncer a PollingComponent
+  - source: github://pr#14370
+    components: [preferences]
+    refresh: 1h
+  # [DNM] ESP-IDF 6.0 support testing
+  - source: github://pr#14770
+    components: [esp32]
+    refresh: 1h
+
+substitutions:
+  poll_period: 500ms #tests at 0, 500ms, and 1000ms showed 500ms had lowest power consumption
+
+esphome:
+  name: test-esp32c6-1
+  friendly_name: Test ESP32C6 1
+  on_boot:
+    priority: -100
+    then:
+      - script.execute: wait_for_esphome_prevent_sleep_value
+
+preferences:
+ id: preferences_id
+
+esp32:
+  #esp32-c6 Fire Beetle v1.2
+  variant: esp32c6
+  flash_size: 4MB
+  framework:
+    type: esp-idf
+    version: 6.0.1
+    log_level: INFO
+    sdkconfig_options:
+      CONFIG_VFS_SUPPORT_DIR: "y"
+      CONFIG_MBEDTLS_FS_IO: "y"
+      CONFIG_LIBC_PICOLIBC_NEWLIB_COMPATIBILITY: "y"
+  watchdog_timeout: 60s
+
+logger:
+  level: DEBUG
+  hardware_uart: UART0 # monitor via UART pins
+
+power_management:
+  enable_light_sleep: true
+  idle_time_before_sleep: 10
+  power_down_flash: true
+  power_down_peripherals: true
+#  profiling: true
+
+network:
+  enable_ipv6: true
+  enable_ipv4: false
+
+openthread:
+  device_type: mtd
+  force_dataset: true
+  tlv: !secret openthread_tlv_wed
+  poll_period: ${poll_period}
+  output_power: 0
+
+api:
+  encryption:
+    key: !secret api_encryption_key
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+deep_sleep:
+  id: deep_sleep_1
+  run_duration: 1min
+  sleep_duration: 1min
+
+# used to determine if hardware reboots are occuring
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    id: uptime_sensor_id
+    type: seconds
+    update_interval: 60sec
+    # profiling sleep to stdout - don't do permanently
+#    on_value:
+#      then:
+#      - lambda: |-
+#          esp_pm_dump_locks(stdout);
+
+binary_sensor:
+  - platform: homeassistant
+    name: "Input Boolean Prevent Sleep Sensor"
+    entity_id: input_boolean.esphome_prevent_sleep
+    id: ESPHome_prevent_sleep_sensor
+    trigger_on_initial_state: true
+    internal: true
+    # transition of input_boolean.esphome_prevent_sleep during awake
+    on_state:
+      then:
+      - if:
+          condition:
+            binary_sensor.is_on: ESPHome_prevent_sleep_sensor
+          then:
+            - logger.log: "input_boolean.esphome_prevent_sleep ON, prevent deep sleep"
+            - deep_sleep.prevent: deep_sleep_1
+          else:
+            - logger.log: "input_boolean.esphome_prevent_sleep OFF, allow deep sleep"
+            - deep_sleep.allow: deep_sleep_1
+
+# wakeup check of input_boolean.esphome_prevent_sleep
+script:
+  - id: wait_for_esphome_prevent_sleep_value
+    mode: queued
+    then:
+      - wait_until:
+          condition:
+            api.connected: {}
+      - component.update: uptime_sensor_id
+      - wait_until:
+          condition:
+            lambda: return id(ESPHome_prevent_sleep_sensor).has_state();
+      - if:
+          condition:
+            binary_sensor.is_on: ESPHome_prevent_sleep_sensor
+          then:
+            - logger.log: "input_boolean.esphome_prevent_sleep ON, prevent deep sleep"
+            - deep_sleep.prevent: deep_sleep_1
+          else:
+            - logger.log: "input_boolean.esphome_prevent_sleep OFF, enter deep sleep"
+            - deep_sleep.enter: deep_sleep_1
