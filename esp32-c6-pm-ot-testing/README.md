@@ -1,53 +1,31 @@
 # Power Management Testing of esp32-c6 DFRobot Fire Beetle
 Testing the external power_management component using the Nordic Semiconductor Power Profiler Kit II (PPK2)
 
-
 ## 2026-May-07
 
-### Test Scenario
+### Test Scenario - Coap Server, Light Sleep 180s Poll Period, 180s Main Loop Interval
 
-* Test Date 2026-05-07
+* Test Date 2026-05-15
 * EspHome Dev, using esp-idf 6.0.1
 * DUT: ESP32-C6FH4 (QFN32) (revision v0.2) (esp32-c6 DFRobot Fire Beetle v1.2
 * DUT Features: Wi-Fi 6, BT 5 (LE), IEEE802.15.4, Single Core + LP Core, 160MHz, Crystal frequency: 40MHz
 * Power Supply: 3.3V pin
-* OpenThread Sleepy End Device with 60 second Poll Period
+* OpenThread Sleepy End Device with 180 second Poll Period
 * Automatic Light Sleep enabled
-* Uptime Sensor on a 60 second interval.
-* Main Loop on a 30 second interval.
+* Uptime Sensor on a 180 second interval.
+* Main Loop on a 180 second interval.
 * Using a bespoke Coap_Server and observe the sensor from a command shell coap_client
 
 ### Test Results
 
-1 hour steady state of ~150uA
+1 hour steady state of ~85uA
 
-![Alt text](./test-espc6-pm-coap_20260507.png)
-
-## 2026-May-10
-
-### Test Scenario
-
-* Test Date 2026-05-10
-* EspHome Dev, using esp-idf 6.0.1
-* DUT: ESP32-C6FH4 (QFN32) (revision v0.2) (esp32-c6 DFRobot Fire Beetle v1.2
-* DUT Features: Wi-Fi 6, BT 5 (LE), IEEE802.15.4, Single Core + LP Core, 160MHz, Crystal frequency: 40MHz
-* Power Supply: 3.3V pin
-* OpenThread Sleepy End Device with 60 second Poll Period
-* Automatic Light Sleep enabled
-* Uptime Sensor on a 60 second interval.
-* Main Loop on a 30 second interval.
-* Using api component
-
-### Test Results
-
-1 hour steady state of ~286uA
-
-![Alt text](./test-espc6-pm_20260510.png)
+![Alt text](./test-espc6-pm-coap_20260515.png)
 
 
 ## 2026-May-11
 
-### Test Scenario
+### Test Scenario - API, Deep Sleep
 
 * Test Date 2026-05-10
 * EspHome Dev, using esp-idf 6.0.1
@@ -86,3 +64,46 @@ Testing the external power_management component using the Nordic Semiconductor P
 The re-attach process with parent and reconnect with HA took longer than earlier tests
 
 ![Alt text](./test-espc6-pm-ds-10min-20260511_0500.png)
+![Alt text](./test-espc6-pm-coap_20260507.png)
+
+## 2026-May-10 - API, Light Sleep 60s Poll Period, 30s Main Loop Interval
+
+### Test Scenario
+
+* Test Date 2026-05-10
+* EspHome Dev, using esp-idf 6.0.1
+* DUT: ESP32-C6FH4 (QFN32) (revision v0.2) (esp32-c6 DFRobot Fire Beetle v1.2
+* DUT Features: Wi-Fi 6, BT 5 (LE), IEEE802.15.4, Single Core + LP Core, 160MHz, Crystal frequency: 40MHz
+* Power Supply: 3.3V pin
+* OpenThread Sleepy End Device with 60 second Poll Period
+* Automatic Light Sleep enabled
+* Uptime Sensor on a 60 second interval.
+* Main Loop on a 30 second interval.
+* Using api component
+
+### Test Results
+
+1 hour steady state of ~286uA
+
+![Alt text](./test-espc6-pm_20260510.png)
+
+## 2026-May-07
+
+### Test Scenario - Coap Server, Light Sleep 60s Poll Period, 30s Main Loop Interval
+
+* Test Date 2026-05-07
+* EspHome Dev, using esp-idf 6.0.1
+* DUT: ESP32-C6FH4 (QFN32) (revision v0.2) (esp32-c6 DFRobot Fire Beetle v1.2
+* DUT Features: Wi-Fi 6, BT 5 (LE), IEEE802.15.4, Single Core + LP Core, 160MHz, Crystal frequency: 40MHz
+* Power Supply: 3.3V pin
+* OpenThread Sleepy End Device with 60 second Poll Period
+* Automatic Light Sleep enabled
+* Uptime Sensor on a 60 second interval.
+* Main Loop on a 30 second interval.
+* Using a bespoke Coap_Server and observe the sensor from a command shell coap_client
+
+### Test Results
+
+1 hour steady state of ~150uA
+
+![Alt text](./test-espc6-pm-coap_20260507.png)

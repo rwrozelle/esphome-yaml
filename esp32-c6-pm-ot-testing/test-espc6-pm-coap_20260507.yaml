@@ -1,6 +1,3 @@
-#runtime_stats:
-#  log_interval: 60s
-
 external_components:
   # [network][socket] Disable IPV4
   - source: github://pr#14526
@@ -17,10 +14,6 @@ external_components:
   # [preferences] make IntervalSyncer a PollingComponent
   - source: github://pr#14370
     components: [preferences]
-    refresh: 1h
-  # [DNM] ESP-IDF 6.0 support testing
-  - source: github://pr#14770
-    components: [esp32]
     refresh: 1h
   # Bespoke Coap Server
   - source: github://rwrozelle/esphome@ot-coap-server
@@ -97,7 +90,8 @@ switch:
         - logger.log: "Radio Always On"
         - openthread.pollperiod: 0s
         - lambda: |-
-            App.set_loop_interval(7);
+            App.set_loop_interval(16);
+    # This runs at boot also because of initialization of switch
     turn_off_action:
       then:
         - logger.log: "Radio Off When Idle"

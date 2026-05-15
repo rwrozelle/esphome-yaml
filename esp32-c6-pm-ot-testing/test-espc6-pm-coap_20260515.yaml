@@ -3,8 +3,8 @@ external_components:
   - source: github://pr#14526
     components: [network,socket]
     refresh: 1h
-  # [openthread] rewrite openthread esp.cpp to use new esp functions
-  - source: github://pr#16334
+  # [openthread] Child Timeout, Child Supervision Check Timeout, and Child Supervision defaults
+  - source: github://pr#16387
     components: [openthread]
     refresh: 1h
   # [power_management] new component that enables power management for esp_idf
@@ -15,9 +15,13 @@ external_components:
   - source: github://pr#14370
     components: [preferences]
     refresh: 1h
+  # Bespoke Coap Server
+  - source: github://rwrozelle/esphome@ot-coap-server
+    components: [coap_server]
+    refresh: 1h
 
 substitutions:
-  poll_period: 60sec
+  poll_period: 180sec
 
 esphome:
   name: test-esp32c6-1
@@ -25,9 +29,9 @@ esphome:
   on_boot:
     then:
       - delay: 70s
-      - lambda: |-
-          App.set_loop_interval(30000);
-      - logger.log: "Loop interval set to 30sec"
+#      - lambda: |-
+#          App.set_loop_interval(180000);
+#      - logger.log: "Loop interval set to 180sec"
       - component.suspend: preferences_id
       - logger.log: "stop preference storing"
 
@@ -46,9 +50,7 @@ esp32:
       CONFIG_VFS_SUPPORT_DIR: "y"
       CONFIG_MBEDTLS_FS_IO: "y"
       CONFIG_LIBC_PICOLIBC_NEWLIB_COMPATIBILITY: "y"
-      CONFIG_LWIP_TCP_TMR_INTERVAL: "5000"
-      CONFIG_LWIP_TCP_RTO_TIME: "10000"
-  watchdog_timeout: 60s
+  watchdog_timeout: 0s
 
 logger:
   level: DEBUG
@@ -67,14 +69,12 @@ network:
 
 openthread:
   device_type: mtd
-#  force_dataset: true
+  #force_dataset: true
   tlv: !secret openthread_tlv_wed
   poll_period: ${poll_period}
   output_power: 0
 
-api:
-  encryption:
-    key: !secret api_encryption_key
+coap_server:
 
 ota:
   - platform: esphome
@@ -97,7 +97,7 @@ switch:
         - logger.log: "Radio Off When Idle"
         - openthread.pollperiod: ${poll_period}
         - lambda: |-
-            App.set_loop_interval(30000);
+            App.set_loop_interval(180000);
 
 # used to determine if hardware reboots are occuring
 sensor:
