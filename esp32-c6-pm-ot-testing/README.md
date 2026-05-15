@@ -1,7 +1,7 @@
 # Power Management Testing of esp32-c6 DFRobot Fire Beetle
 Testing the external power_management component using the Nordic Semiconductor Power Profiler Kit II (PPK2)
 
-## 2026-May-07
+## 2026-May-15
 
 ### Test Scenario - Coap Server, Light Sleep 180s Poll Period, 180s Main Loop Interval
 
