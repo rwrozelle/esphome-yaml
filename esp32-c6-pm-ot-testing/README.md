@@ -64,7 +64,6 @@ Testing the external power_management component using the Nordic Semiconductor P
 The re-attach process with parent and reconnect with HA took longer than earlier tests
 
 ![Alt text](./test-espc6-pm-ds-10min-20260511_0500.png)
-![Alt text](./test-espc6-pm-coap_20260507.png)
 
 ## 2026-May-10 - API, Light Sleep 60s Poll Period, 30s Main Loop Interval
 
